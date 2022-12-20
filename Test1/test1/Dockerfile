@@ -9,8 +9,8 @@ SHELL ["/bin/bash", "-c"]
 ENV PATH /opt/conda/bin:$PATH
 ENV PYTHON_VERSION=${python}
 ENV DASK_VERSION=${release}
-RUN echo DASK_VERSION
-RUN echo PYTHON_VERSION
+RUN echo ${release}
+RUN echo ${python}
 
 RUN mamba install -y \
     "mamba>=0.27.0" \
