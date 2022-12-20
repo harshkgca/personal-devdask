@@ -3,7 +3,8 @@ version: "3.1"
 services:
   scheduler:
     build:
-      context: ../base
+      # context: ../base
+      context: .
       dockerfile: Dockerfile
       args:
         release: "2022.12.1"
@@ -17,7 +18,8 @@ services:
 
   worker:
     build:
-      context: ../base
+      # context: ../base
+      context: .
       dockerfile: Dockerfile
       args:
         python: "3.8"
