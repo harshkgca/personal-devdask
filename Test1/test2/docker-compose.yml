@@ -32,20 +32,3 @@ services:
     image: asia.gcr.io/retailigence-2020/dev-daskgateway:2.771
     hostname: dask-worker
     command: ["dask-worker", "tcp://scheduler:8786"]
-
-  notebook:
-    build:
-      context: ../notebook
-      dockerfile: Dockerfile
-      args:
-        base: daskdev
-        python: "3.8"
-        release: "2022.12.1"
-    depends_on:
-      - docker-stacks-foundation
-    image: asia.gcr.io/retailigence-2020/dev-daskgateway:2.771
-    hostname: notebook
-    ports:
-      - "8888:8888"
-    environment:
-      - DASK_SCHEDULER_ADDRESS="tcp://scheduler:8786"
