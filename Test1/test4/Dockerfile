@@ -33,4 +33,6 @@ RUN mkdir /opt/app
 
 EXPOSE 8786
 EXPOSE 8787
+RUN chmod +x /usr/bin/prepare.sh
+
 ENTRYPOINT ["tini", "-g", "--", "/usr/bin/prepare.sh"]
