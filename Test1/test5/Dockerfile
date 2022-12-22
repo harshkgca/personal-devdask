@@ -12,6 +12,11 @@ ENV DASK_VERSION=${release}
 RUN echo ${release}
 RUN echo ${python}
 
+COPY requirements.txt .
+
+# ECHO ${WORKDIR}
+RUN pwd
+# RUN ECHO ${$PWD}
 RUN mamba install -y \
     "mamba>=0.27.0" \
     python=${PYTHON_VERSION} \
