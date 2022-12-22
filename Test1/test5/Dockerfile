@@ -1,3 +1,5 @@
+# FROM python:3.8.3 AS celery_alone
+
 ARG BASE_CONTAINER=condaforge/mambaforge:latest
 FROM $BASE_CONTAINER
 
