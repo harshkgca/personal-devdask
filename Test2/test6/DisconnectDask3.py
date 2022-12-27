@@ -78,8 +78,6 @@ cluster = GCPCluster(n_workers=1,
                      # docker_args="sudo docker pull asia.gcr.io/retailigence-2020/dev-daskgateway:2.773 \n ",
                      zone='europe-west3-a',
                      auto_shutdown=False,
-                     # env_vars={'mongo_uri':'mongodb://HEB_Admin:H38na0dm1n3yMgphb18rj@192.168.0.24:27017/DEV_HEB_DB'},
-                     env_vars={'mongo_uri':'mongodb://HEB_Admin:H38na0dm1n3yMgphb18rj@34.162.41.6:27017/DEV_HEB_DB'},
                      # machine_type="n1-custom-6-32768"
                      )
 
