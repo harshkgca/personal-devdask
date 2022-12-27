@@ -38,12 +38,13 @@ import time
 from dask_cloudprovider.gcp import GCPCluster
 import os
 from dask.distributed import Client
+from datetime import datetime
 import dask.array as da
 
-from pymongo import MongoClient
-mongo = 'mongodb://HEB_Admin:H38na0dm1n3yMgphb18rj@34.162.41.6:27017/DEV_HEB_DB'
-mongo_uri = MongoClient(mongo)
-print(mongo_uri)
+# from pymongo import MongoClient
+# mongo = 'mongodb://HEB_Admin:H38na0dm1n3yMgphb18rj@34.162.41.6:27017/DEV_HEB_DB'
+# mongo_uri = MongoClient(mongo)
+# print(mongo_uri)
 # exit(0)
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'retailigence2020.json'
 # cloud_init = GCPCluster.get_cloud_init(
@@ -72,7 +73,8 @@ cluster = GCPCluster(n_workers=1,
                      # docker_image="asia.gcr.io/retailigence-2020/dev-daskgateway@sha256:4350e58f11e00867d720b8992fc2580689fe32619f444ab9625e0079c9cd5bc3",
                      # docker_image="asia.gcr.io/retailigence-2020/dev-daskgateway:2.764",
                      # docker_image="asia.gcr.io/retailigence-2020/dev-daskgateway:2.774",
-                     docker_image="asia.gcr.io/retailigence-2020/dev-daskgateway:2.775",
+                     # docker_image="asia.gcr.io/retailigence-2020/dev-daskgateway:2.775",
+                     docker_image="asia.gcr.io/retailigence-2020/dev-daskgateway:2.776",
                      # network='subnet4',
                      docker_args='',
                      # docker_args="sudo docker pull asia.gcr.io/retailigence-2020/dev-daskgateway:2.773 \n ",
@@ -141,10 +143,12 @@ def test():
         print(e)
         return e
 
+t1 = datetime.now()
 print('cluster created')
 client = Client(cluster)
 print(client)
 print(client.dashboard_link)
+t2 = datetime.now()
 ''''''
 # arr = da.random.random((1000, 1000), chunks=(100, 100))
 # print(arr)
@@ -153,7 +157,12 @@ print(client.dashboard_link)
 # print('computed')
 ''''''
 a = client.submit(test)
+t3 = datetime.now()
 data = client.gather(a)
+t4 = datetime.now()
+print(t4-t3)
+print(t4-t2)
+print(t4-t1)
 print(data)
 # client.gather(a)
 stat = None
