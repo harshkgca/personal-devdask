@@ -9,7 +9,7 @@ services:
       args:
         release: "2022.12.1"
     # image: ghcr.io/dask/dask:latest
-    image: asia.gcr.io/retailigence-2020/dev-daskgateway:2.775
+    image: asia.gcr.io/retailigence-2020/dev-daskgateway:2.776
     hostname: dask-scheduler
     ports:
       - "8786:8786"
@@ -25,6 +25,6 @@ services:
         python: "3.8"
         release: "2022.12.1"
     # image: ghcr.io/dask/dask:latest
-    image: asia.gcr.io/retailigence-2020/dev-daskgateway:2.775
+    image: asia.gcr.io/retailigence-2020/dev-daskgateway:2.776
     hostname: dask-worker
     command: ["dask-worker", "tcp://scheduler:8786"]
