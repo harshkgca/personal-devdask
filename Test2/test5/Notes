@@ -1,0 +1,9 @@
+docker-compose -f docker-compose.yml build
+
+https://cloud.google.com/sdk/docs/install
+
+https://github.com/docker/compose/issues/5930
+
+https://senrigan.io/blog/how-to-handle-docker-credentials-store-errors-in-docker-credential-gcloud/
+
+docker-compose -f docker-compose.yml build
