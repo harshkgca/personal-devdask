@@ -15,7 +15,7 @@ RUN echo ${release}
 RUN echo ${python}
 
 COPY requirements.txt .
-COPY DisconnectDask3.py .
+# COPY DisconnectDask3.py .
 
 # ECHO ${WORKDIR}
 RUN pwd
