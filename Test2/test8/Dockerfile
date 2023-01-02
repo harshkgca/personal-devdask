@@ -13,7 +13,10 @@ ENV PYTHON_VERSION=${python}
 ENV DASK_VERSION=${release}
 RUN echo ${release}
 RUN echo ${python}
-
+RUN pwd
+# ARG pwd_val=${RUN pwd}
+RUN echo pwd
+# RUN echo pwd_val
 COPY requirements.txt .
 # COPY DisconnectDask3.py .
 COPY /home/harsh_gangar/retailligence-backend .
