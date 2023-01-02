@@ -8,4 +8,4 @@ https://senrigan.io/blog/how-to-handle-docker-credentials-store-errors-in-docker
 
 sed -i -e 's/gcloud/gcr/g' ~/.docker/config.json
 
-docker-compose -f docker-compose.yml build
+docker-compose -f docker-compose-dask.yml build

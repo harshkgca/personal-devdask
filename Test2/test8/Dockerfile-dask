@@ -24,23 +24,72 @@ COPY retailligence-backend .
 # ECHO ${WORKDIR}
 RUN pwd
 # RUN ECHO ${$PWD}
-RUN mamba install -y \
-    "mamba>=0.27.0" \
-    python=${PYTHON_VERSION} \
-    nomkl \
-    cmake \
-    dask=${DASK_VERSION} \
-    cachey \
-    streamz \
-    && mamba clean -tipy \
+RUN useradd -m -U -u 1000 gatewayuser \
+    && apt-get update \
+    && apt-get install -y libbz2-dev \
+    && apt-get install -y tini wget bzip2 \
+    && wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-$CONDA_VERSION-Linux-x86_64.sh \
+    && echo "${CONDA_SHA256}  Miniconda3-$CONDA_VERSION-Linux-x86_64.sh" > miniconda.checksum \
+    && if [ $(sha256sum -c miniconda.checksum | awk '{print $2}') != "OK" ] ; then exit 1; fi \
+    && mv Miniconda3-$CONDA_VERSION-Linux-x86_64.sh miniconda.sh \
+    && sh ./miniconda.sh -b -p /opt/conda \
+    && rm miniconda.sh miniconda.checksum \
+    && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
+    && echo ". /opt/conda/etc/profile.d/conda.sh" >> /home/gatewayuser/.profile \
+    && echo "conda activate base" >> /home/gatewayuser/.profile \
+    && echo "always_yes: true" >> /home/gatewayuser/.condarc \
+    && echo "changeps1: false" >> /home/gatewayuser/.condarc \
+    && echo "auto_update_conda: false" >> /home/gatewayuser/.condarc \
+    && echo "aggressive_update_packages: []" >> /home/gatewayuser/.condarc \
+    && find /opt/conda/ -follow -type f -name '*.a' -delete \
+    && chown -R gatewayuser:gatewayuser /opt/conda \
+    && apt-get autoremove --purge -y wget bzip2 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+USER 1000:1000
+ENV PATH="/opt/conda/bin:$PATH"
+WORKDIR /home/gatewayuser/
+ENV PYTHONPATH="/home/gatewayuser/"
+COPY retailligence-backend .
+#COPY SpaceModeller .
+COPY requirements.txt .
+RUN python3 -m pip install pip \
+    && pip install -U flask-cors \
+    && python -m pip install pandas==1.0.1 \
+                            numpy==1.20.3 \
+                            "dask[complete]"==2021.10.0 \
+                            dask-distance==0.2.0 \
+                            dask-gateway==0.9.0 \
+                            dask-glm==0.2.0 \
+                            dask-kubernetes==0.11.0 \
+                            dask-ml==1.9.0 \
+    && pip install -r requirements.txt \
+    && conda install -c anaconda cytoolz==0.11.0 \
     && find /opt/conda/ -type f,l -name '*.a' -delete \
     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
-    && pip install -r requirements.txt
-    # && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
-    # && rm -rf /opt/conda/pkgs
+    && /opt/conda/bin/conda clean -afy \
+    && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
+    && rm -rf /opt/conda/pkgs
 
-COPY prepare.sh /usr/bin/prepare.sh
+# RUN mamba install -y \
+#     "mamba>=0.27.0" \
+#     python=${PYTHON_VERSION} \
+#     nomkl \
+#     cmake \
+#     dask=${DASK_VERSION} \
+#     cachey \
+#     streamz \
+#     && mamba clean -tipy \
+#     && find /opt/conda/ -type f,l -name '*.a' -delete \
+#     && find /opt/conda/ -type f,l -name '*.pyc' -delete \
+#     && find /opt/conda/ -type f,l -name '*.js.map' -delete \
+#     && pip install -r requirements.txt
+#     # && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
+#     # && rm -rf /opt/conda/pkgs
+
+COPY prepare-dask.sh /usr/bin/prepare.sh
 
 RUN mkdir /opt/app
 
