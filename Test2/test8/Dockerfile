@@ -15,7 +15,8 @@ RUN echo ${release}
 RUN echo ${python}
 
 COPY requirements.txt .
-COPY DisconnectDask3.py .
+# COPY DisconnectDask3.py .
+COPY /home/harsh_gangar/retailligence-backend .
 
 # ECHO ${WORKDIR}
 RUN pwd
