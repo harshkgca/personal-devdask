@@ -1,0 +1,11 @@
+docker-compose -f docker-compose.yml build
+
+https://cloud.google.com/sdk/docs/install
+
+https://github.com/docker/compose/issues/5930
+
+https://senrigan.io/blog/how-to-handle-docker-credentials-store-errors-in-docker-credential-gcloud/
+
+sed -i -e 's/gcloud/gcr/g' ~/.docker/config.json
+
+docker-compose -f docker-compose-dask.yml build

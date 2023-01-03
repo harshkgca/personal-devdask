@@ -1,0 +1,98 @@
+# An example Dockerfile for creating an image to use as a dask scheduler/worker
+# with dask-gateway.
+#
+# The only requirement for such an image is that it has a version of
+# `dask-gateway` installed that is compatible with the corresponding
+# `dask-gateway-server`.
+#
+# Additionally, it is recommended that your `dask-gateway` image uses an init
+# process (we recommend `tini` https://github.com/krallin/tini). This isn't
+# strictly required, but you may run into weird bugs without an init process.
+#
+# Note that the version of Python or Python distribution doesn't matter. Here
+# we'll install python via miniconda, then use `conda` to install all
+# dependencies
+FROM debian:buster-slim
+
+# The miniconda version and corresponding SHA256 to use.
+# You can see all available options here:
+# https://docs.conda.io/en/latest/miniconda_hashes.html
+ARG CONDA_VERSION=py38_4.8.3
+ARG CONDA_SHA256=879457af6a0bf5b34b48c12de31d4df0ee2f06a8e68768e5758c3293b2daf688
+
+#ARG CONDA_VERSION=py39_4.9.2
+#ARG CONDA_SHA256=1314b90489f154602fd794accfc90446111514a5a72fe1f71ab83e07de9504a7
+
+# set by harsh
+ENV DASK_DISTRIBUTED__COMM__TIMEOUTS__CONNECT 1000
+ENV DASK_DISTRIBUTED__COMM__RETRY__COUNT 30
+ENV DASK_DISTRIBUTED_COMM_TIMEOUTS_TCP 1800
+# ENV MALLOC_MMAP_THRESHOLD_ 8192
+# ENV MALLOC_TRIM_THRESHOLD_ 0
+#------
+# Does the following in one layer:
+# - Create user dask
+# - Install tini
+# - Install miniconda build dependencies
+# - Download miniconda and check the sha256 checksum
+# - Install miniconda
+# - Configure conda to minimize automatic package updates
+# - Remove all conda managed static libraries
+# - Cleanup conda files
+# - Uninstall miniconda build dependencies
+RUN useradd -m -U -u 1000 gatewayuser \
+    && apt-get update \
+    && apt-get install -y libbz2-dev \
+    && apt-get install -y tini wget bzip2 \
+    && wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-$CONDA_VERSION-Linux-x86_64.sh \
+    && echo "${CONDA_SHA256}  Miniconda3-$CONDA_VERSION-Linux-x86_64.sh" > miniconda.checksum \
+    && if [ $(sha256sum -c miniconda.checksum | awk '{print $2}') != "OK" ] ; then exit 1; fi \
+    && mv Miniconda3-$CONDA_VERSION-Linux-x86_64.sh miniconda.sh \
+    && sh ./miniconda.sh -b -p /opt/conda \
+    && rm miniconda.sh miniconda.checksum \
+    && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
+    && echo ". /opt/conda/etc/profile.d/conda.sh" >> /home/gatewayuser/.profile \
+    && echo "conda activate base" >> /home/gatewayuser/.profile \
+    && echo "always_yes: true" >> /home/gatewayuser/.condarc \
+    && echo "changeps1: false" >> /home/gatewayuser/.condarc \
+    && echo "auto_update_conda: false" >> /home/gatewayuser/.condarc \
+    && echo "aggressive_update_packages: []" >> /home/gatewayuser/.condarc \
+    && find /opt/conda/ -follow -type f -name '*.a' -delete \
+    && chown -R gatewayuser:gatewayuser /opt/conda \
+    && apt-get autoremove --purge -y wget bzip2 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Setup the dask user's environment
+USER 1000:1000
+ENV PATH="/opt/conda/bin:$PATH"
+WORKDIR /home/gatewayuser/
+ENV PYTHONPATH="/home/gatewayuser/"
+COPY retailligence-backend .
+#COPY SpaceModeller .
+COPY requirements.txt .
+RUN python3 -m pip install pip \
+    && pip install -U flask-cors \
+    && python -m pip install pandas==1.0.1 \
+                            numpy==1.20.3 \
+                            "dask[complete]"==2021.10.0 \
+                            dask-distance==0.2.0 \
+                            dask-gateway==0.9.0 \
+                            dask-glm==0.2.0 \
+                            dask-kubernetes==0.11.0 \
+                            dask-ml==1.9.0 \
+    && pip install -r requirements.txt \
+    && conda install -c anaconda cytoolz==0.11.0 \
+    && find /opt/conda/ -type f,l -name '*.a' -delete \
+    && find /opt/conda/ -type f,l -name '*.pyc' -delete \
+    && find /opt/conda/ -type f,l -name '*.js.map' -delete \
+    && /opt/conda/bin/conda clean -afy \
+    && find /opt/conda/lib/python*/site-packages/bokeh/server/static -type f,l -name '*.js' -not -name '*.min.js' -delete \
+    && rm -rf /opt/conda/pkgs
+
+EXPOSE 8786
+EXPOSE 8787
+
+# Configure the entrypoint to use tini
+ENTRYPOINT ["tini", "-g", "--"]
+
