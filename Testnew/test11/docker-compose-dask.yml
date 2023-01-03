@@ -5,7 +5,7 @@ services:
     build:
       # context: ../base
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dask
       args:
         release: "2022.12.1"
     # image: ghcr.io/dask/dask:latest
@@ -20,7 +20,7 @@ services:
     build:
       # context: ../base
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dask
       args:
         python: "3.8"
         release: "2022.12.1"

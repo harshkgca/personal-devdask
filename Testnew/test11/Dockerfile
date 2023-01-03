@@ -28,7 +28,7 @@ RUN python3 -m pip install pip \
     && pip install -U flask-cors \
     && python -m pip install pandas==1.0.1 \
                             numpy==1.20.3 \
-                            "dask[complete]"==2021.10.0 \
+                            "dask[complete]"==2022.10.0 \
                             dask-distance==0.2.0 \
                             dask-gateway==0.9.0 \
                             dask-glm==0.2.0 \
