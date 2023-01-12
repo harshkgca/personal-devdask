@@ -9,3 +9,15 @@ https://senrigan.io/blog/how-to-handle-docker-credentials-store-errors-in-docker
 sed -i -e 's/gcloud/gcr/g' ~/.docker/config.json
 
 docker-compose -f docker-compose-dask.yml build
+
+cd personal-devdask/
+git pull origin master
+cd ../
+
+sudo rm Dockerfile-dask
+sudo rm docker-compose-dask.yml
+sudo rm requirements-dask.txt
+
+sudo cp personal-devdask/Test2/test10/docker-compose-dask.yml .
+sudo cp personal-devdask/Test2/test10/Dockerfile-dask .
+sudo cp personal-devdask/Test2/test10/requirements-dask.txt .
